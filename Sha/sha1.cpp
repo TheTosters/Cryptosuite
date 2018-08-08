@@ -1,6 +1,10 @@
-#include <string.h>
-#include <avr/io.h>
-#include <avr/pgmspace.h>
+﻿#include <string.h>
+#ifdef ESP8266
+  #include <pgmspace.h>
+#else
+  #include <avr/io.h>
+  #include <avr/pgmspace.h>
+#endif
 #include "sha1.h"
 
 #define SHA1_K0 0x5a827999
@@ -72,9 +76,12 @@ void Sha1Class::addUncounted(uint8_t data) {
   }
 }
 
-void Sha1Class::write(uint8_t data) {
+WRITE_RET_TYPE Sha1Class::write(uint8_t data) {
   ++byteCount;
   addUncounted(data);
+#ifdef ESP8266
+  return 1;
+#endif
 }
 
 void Sha1Class::pad() {
@@ -99,7 +106,7 @@ void Sha1Class::pad() {
 uint8_t* Sha1Class::result(void) {
   // Pad to complete the last block
   pad();
-  
+
   // Swap byte order back
   for (int i=0; i<5; i++) {
     uint32_t a,b;
@@ -110,7 +117,7 @@ uint8_t* Sha1Class::result(void) {
     b|=a>>24;
     state.w[i]=b;
   }
-  
+
   // Return pointer to hash (20 characters)
   return state.b;
 }

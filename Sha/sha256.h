@@ -7,6 +7,12 @@
 #define HASH_LENGTH 32
 #define BLOCK_LENGTH 64
 
+#ifdef ESP8266
+  #define WRITE_RET_TYPE size_t
+#else
+  #define WRITE_RET_TYPE void
+#endif
+
 union _buffer {
   uint8_t b[BLOCK_LENGTH];
   uint32_t w[BLOCK_LENGTH/4];
@@ -23,7 +29,7 @@ class Sha256Class : public Print
     void initHmac(const uint8_t* secret, int secretLength);
     uint8_t* result(void);
     uint8_t* resultHmac(void);
-    virtual void write(uint8_t);
+    virtual WRITE_RET_TYPE write(uint8_t);
     using Print::write;
   private:
     void pad();
